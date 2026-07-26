@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocab — Laxicon</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+  <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="index.html" class="font-display text-2xl text-ink">Laxicon</a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="vocab.html" class="nav-link active">Vocab</a>
+        <a href="test.html" class="nav-link">Test</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-12">
+    <h1 class="font-display text-3xl text-ink mb-1">Your words</h1>
+    <p class="text-ink-soft text-sm mb-6" id="count-label">Loading…</p>
+
+    <div class="relative mb-8">
+      <input id="search" type="text" placeholder="Search a word…"
+        class="w-full bg-card border border-app rounded-full px-5 py-3 text-sm text-ink placeholder-ink-soft focus:outline-none focus:ring-2 focus:ring-sage" />
+    </div>
+
+    <div id="state-msg" class="text-ink-soft text-sm"></div>
+    <div id="list" class="space-y-3"></div>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper.
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="data.js"></script>
+  <script>
+    let allWords = [];
+
+    function entryHTML(w, i) {
+      const synChips = w.synonyms.map(s => `<span class="chip chip-syn">${s}</span>`).join(" ");
+      const antChips = w.antonyms.map(s => `<span class="chip chip-ant">${s}</span>`).join(" ");
+      const common = w.commonSentences.map(s => `<li class="text-sm text-ink-soft">${s}</li>`).join("");
+
+      return `
+      <div class="word-card p-5" id="card-${i}">
+        <button class="w-full flex items-center justify-between gap-4 text-left" onclick="toggleCard(${i})">
+          <div class="flex items-center gap-3">
+            <span class="font-display text-xl text-ink">${w.word}</span>
+            ${w.pos ? `<span class="pos-tag">${w.pos}</span>` : ""}
+          </div>
+          <svg class="chevron w-4 h-4 text-ink-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <div class="entry-body">
+          <hr class="squiggle-divider my-4" />
+          <p class="text-ink mb-4 font-bold">${w.meaning}</p>
+
+          ${w.synonyms.length ? `<div class="mb-3"><p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide">Synonyms</p><div class="flex flex-wrap gap-1.5">${synChips}</div></div>` : ""}
+          ${w.antonyms.length ? `<div class="mb-4"><p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide">Antonyms</p><div class="flex flex-wrap gap-1.5">${antChips}</div></div>` : ""}
+
+          ${w.exactSentence ? `<p class="text-sm text-ink-soft italic mb-1">"${w.exactSentence}"</p>` : ""}
+          ${w.synSentence ? `<p class="text-sm text-ink-soft italic mb-1">"${w.synSentence}"</p>` : ""}
+          ${w.antSentence ? `<p class="text-sm text-ink-soft italic mb-3">"${w.antSentence}"</p>` : ""}
+
+          ${common ? `<div><p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide">More examples</p><ul class="list-disc list-inside space-y-1">${common}</ul></div>` : ""}
+        </div>
+      </div>`;
+    }
+
+    function toggleCard(i) {
+      document.getElementById(`card-${i}`).classList.toggle("open");
+    }
+
+    function render(words) {
+      const list = document.getElementById("list");
+      list.innerHTML = words.map((w, i) => entryHTML(w, i)).join("");
+      document.getElementById("count-label").textContent =
+        `${words.length} word${words.length === 1 ? "" : "s"}`;
+    }
+
+    document.getElementById("search").addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      const filtered = allWords.filter(w => w.word.toLowerCase().includes(q));
+      render(filtered);
+    });
+
+    (async () => {
+      const msg = document.getElementById("state-msg");
+      try {
+        allWords = await fetchVocab();
+        if (!allWords.length) {
+          msg.textContent = "No words yet — add some rows to your sheet.";
+          document.getElementById("count-label").textContent = "0 words";
+          return;
+        }
+        render(allWords);
+      } catch (err) {
+        msg.textContent = "Couldn't load your sheet. Check js/config.js (Sheet ID) and sharing settings.";
+        document.getElementById("count-label").textContent = "";
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>

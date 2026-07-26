@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laxicon — Build your vocabulary</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+  <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="index.html" class="font-display text-2xl text-ink">Laxicon</a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="vocab.html" class="nav-link">Vocab</a>
+        <a href="test.html" class="nav-link">Test</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1">
+    <section class="max-w-3xl mx-auto px-6 pt-20 pb-16 text-center">
+      <p class="pos-tag inline-block mb-5">lex·i·con · <span class="italic">n.</span></p>
+      <h1 class="font-display text-5xl md:text-6xl text-ink leading-tight">
+        The words you learn,<br><span class="text-sage">kept close.</span>
+      </h1>
+      <p class="mt-6 text-ink-soft text-lg max-w-xl mx-auto">
+        A quiet place to collect new words, their meanings, and how to actually use them —
+        pulled straight from your own vocabulary sheet.
+      </p>
+      <a href="vocab.html" class="inline-block mt-8 bg-sage-dark text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition">
+        Browse your words
+      </a>
+          <a href="https://forms.gle/G93Fm8JKrKUgeDQy6" class="inline-block mt-8 bg-sage-dark text-white px-6 py-3 rounded-full text-sm font-medium hover:opacity-90 transition">
+        Add Vocab
+      </a>
+    </section>
+
+    <section class="max-w-4xl mx-auto px-6 pb-20 grid sm:grid-cols-3 gap-5">
+      <div class="word-card p-6">
+        <p class="text-sage text-sm font-semibold mb-1">01</p>
+        <h3 class="font-display text-lg text-ink mb-1">Collect</h3>
+        <p class="text-ink-soft text-sm">Every word you add to your sheet shows up here automatically.</p>
+      </div>
+      <div class="word-card p-6">
+        <p class="text-sage text-sm font-semibold mb-1">02</p>
+        <h3 class="font-display text-lg text-ink mb-1">Explore</h3>
+        <p class="text-ink-soft text-sm">Expand any word to see its meaning, synonyms, antonyms, and example sentences.</p>
+      </div>
+      <div class="word-card p-6">
+        <p class="text-sage text-sm font-semibold mb-1">03</p>
+        <h3 class="font-display text-lg text-ink mb-1">Test</h3>
+        <p class="text-ink-soft text-sm">Coming soon — quiz yourself on what you've collected so far.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper. Developed by SuperHuman
+  </footer>
+<script src="./data.js"></script>
+<script src="./config.js"></script>
+</body>
+</html>
