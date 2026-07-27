@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marginalia — Laxicon</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+  <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="index.html"><img src="assets/logo-wordmark.svg" alt="Laxicon" class="h-7"></a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="vocab.html" class="nav-link">Vocab</a>
+        <a href="marginalia.html" class="nav-link active">Marginalia</a>
+        <a href="test.html" class="nav-link">Test</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-12">
+    <h1 class="font-display text-3xl text-ink mb-1">Marginalia</h1>
+    <p class="text-ink-soft text-sm mb-6">Concepts worth remembering, pulled from what you're reading.</p>
+
+    <div class="mb-6">
+      <input id="search" type="text" placeholder="Search title, idea, or tag…"
+        class="w-full bg-card border border-app rounded-full px-5 py-3 text-sm text-ink placeholder-ink-soft focus:outline-none focus:ring-2 focus:ring-sage" />
+    </div>
+
+    <div class="flex flex-wrap gap-3 mb-2">
+      <select id="filter-source" class="bg-card border border-app rounded-full px-4 py-2 text-sm text-ink-soft focus:outline-none focus:ring-2 focus:ring-sage">
+        <option value="">All sources</option>
+      </select>
+      <select id="filter-category" class="bg-card border border-app rounded-full px-4 py-2 text-sm text-ink-soft focus:outline-none focus:ring-2 focus:ring-sage">
+        <option value="">All categories</option>
+      </select>
+      <button id="clear-filters" class="text-sm text-sage-dark underline">Clear filters</button>
+    </div>
+
+    <p class="text-ink-soft text-sm mt-4 mb-4" id="count-label">Loading…</p>
+    <div id="state-msg" class="text-ink-soft text-sm"></div>
+    <div id="list" class="space-y-3"></div>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper.
+  </footer>
+
+  <script src="marginalia-config.js"></script>
+  <script src="marginalia-data.js"></script>
+  <script>
+    let allEntries = [];
+
+    function entryHTML(e, i) {
+      const tagChips = e.tags.map(t => `<span class="chip">${t}</span>`).join(" ");
+      return `
+      <div class="word-card p-5" id="card-${i}">
+        <button class="w-full flex items-start justify-between gap-4 text-left" onclick="toggleCard(${i})">
+          <div>
+            <span class="font-display text-xl text-ink block mb-1">${e.title}</span>
+            <span class="text-xs text-ink-soft">${e.source}${e.category ? " · " + e.category : ""}</span>
+          </div>
+          <svg class="chevron w-4 h-4 text-ink-soft shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <div class="entry-body">
+          <hr class="squiggle-divider my-4" />
+          ${e.coreIdea ? `<p class="text-ink mb-3">${e.coreIdea}</p>` : ""}
+          ${e.description ? `<p class="text-sm text-ink-soft mb-3 whitespace-pre-line">${e.description}</p>` : ""}
+          ${e.description2 ? `<p class="text-sm text-ink-soft mb-3 whitespace-pre-line">${e.description2}</p>` : ""}
+          ${tagChips ? `<div class="flex flex-wrap gap-1.5 mt-3">${tagChips}</div>` : ""}
+        </div>
+      </div>`;
+    }
+
+    function toggleCard(i) {
+      document.getElementById(`card-${i}`).classList.toggle("open");
+    }
+
+    function populateFilters(entries) {
+      const sourceSel = document.getElementById("filter-source");
+      const catSel = document.getElementById("filter-category");
+      const sources = [...new Set(entries.map(e => e.source).filter(Boolean))].sort();
+      const cats = [...new Set(entries.map(e => e.category).filter(Boolean))].sort();
+      sourceSel.innerHTML = `<option value="">All sources</option>` + sources.map(s => `<option value="${s}">${s}</option>`).join("");
+      catSel.innerHTML = `<option value="">All categories</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join("");
+    }
+
+    function render(entries) {
+      const list = document.getElementById("list");
+      list.innerHTML = entries.map((e, i) => entryHTML(e, i)).join("");
+      document.getElementById("count-label").textContent =
+        `${entries.length} entr${entries.length === 1 ? "y" : "ies"}`;
+    }
+
+    function applyFilters() {
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      const source = document.getElementById("filter-source").value;
+      const category = document.getElementById("filter-category").value;
+
+      const filtered = allEntries.filter(e => {
+        const matchesQuery = !q ||
+          e.title.toLowerCase().includes(q) ||
+          e.coreIdea.toLowerCase().includes(q) ||
+          e.tags.some(t => t.toLowerCase().includes(q));
+        const matchesSource = !source || e.source === source;
+        const matchesCategory = !category || e.category === category;
+        return matchesQuery && matchesSource && matchesCategory;
+      });
+      render(filtered);
+    }
+
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("filter-source").addEventListener("change", applyFilters);
+    document.getElementById("filter-category").addEventListener("change", applyFilters);
+    document.getElementById("clear-filters").addEventListener("click", () => {
+      document.getElementById("search").value = "";
+      document.getElementById("filter-source").value = "";
+      document.getElementById("filter-category").value = "";
+      applyFilters();
+    });
+
+    (async () => {
+      const msg = document.getElementById("state-msg");
+      try {
+        allEntries = await fetchMarginalia();
+        if (!allEntries.length) {
+          msg.textContent = "No entries yet — add some rows to your sheet.";
+          document.getElementById("count-label").textContent = "0 entries";
+          return;
+        }
+        populateFilters(allEntries);
+        render(allEntries);
+      } catch (err) {
+        msg.textContent = "Couldn't load your sheet. Check js/marginalia-config.js (Sheet ID) and sharing settings.";
+        document.getElementById("count-label").textContent = "";
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>
