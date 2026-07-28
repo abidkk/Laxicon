@@ -23,8 +23,9 @@
   </header>
 
   <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-12">
-        <div class="flex  justify-end  p-2">
+        <div class="flex  justify-end  p-2 gap-2">
       <a href="https://forms.gle/G93Fm8JKrKUgeDQy6" class="bg-sage-dark text-white px-4 py-2 rounded-full text-sm">Add New</a>
+      <a href="https://chatgpt.com/share/6a69028a-2780-83ee-bff7-46d25647e33d" class=" px-4 border  border-2 rounded-full borer-sage-dark py-2 " target="_blank ">chat</a>
     </div>
     <h1 class="font-display text-3xl text-ink mb-1">Your words</h1>
     <p class="text-ink-soft text-sm mb-6" id="count-label">Loading…</p>
@@ -69,9 +70,9 @@
           ${w.synonyms.length ? `<div class="mb-3"><p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide">Synonyms</p><div class="flex flex-wrap gap-1.5">${synChips}</div></div>` : ""}
           ${w.antonyms.length ? `<div class="mb-4"><p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide">Antonyms</p><div class="flex flex-wrap gap-1.5">${antChips}</div></div>` : ""}
 
-          ${w.exactSentence ? `<p class="text-sm text-ink-soft italic mb-1">"${w.exactSentence}"</p>` : ""}
-          ${w.synSentence ? `<p class="text-sm text-ink-soft italic mb-1">"${w.synSentence}"</p>` : ""}
-          ${w.antSentence ? `<p class="text-sm text-ink-soft italic mb-3">"${w.antSentence}"</p>` : ""}
+          ${w.exactSentence ? `<p class="text-sm  italic mb-1 ">1. ${w.exactSentence}</p>` : ""}
+          ${w.synSentence ? `<p class="text-sm text-ink-soft italic mb-1">2. ${w.synSentence}</p>` : ""}
+          ${w.antSentence ? `<p class="text-sm text-ink-soft italic mb-3">3. ${w.antSentence}</p>` : ""}
 
           ${common ? `<div><p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide">More examples</p><ul class="list-disc list-inside space-y-1">${common}</ul></div>` : ""}
         </div>
