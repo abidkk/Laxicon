@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumen — Laxicon</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+  <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <!-- <a href="/index.html"><img src="assets/logo-wordmark.svg" alt="Laxicon" class="h-7"></a> -->
+      <a href="/index.html" class="font-display text-2xl text-ink">Laxicon</a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="/index.html" class="nav-link">Home</a>
+        <a href="/pages/vocab.html" class="nav-link">Vocab</a>
+        <a href="/pages/marginalia.html" class="nav-link">Marginalia</a>
+        <a href="/pages/resumen.html" class="nav-link active">Resumen</a>
+        <a href="/pages/test.html" class="nav-link">Test</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-6 py-12">
+    <h1 class="font-display text-3xl text-ink mb-1">Resumen</h1>
+    <p class="text-ink-soft text-sm mb-8">Book notes and summaries, one card per book.</p>
+
+    <div id="grid" class="grid sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper.
+  </footer>
+
+  <script src="/js/db/resumen-data.js"></script>
+  <script>
+    function cardHTML(b) {
+      return `
+      <a href="${b.more_info}" class="word-card overflow-hidden flex flex-col">
+        <div class="aspect-[3/4] bg-[#F0EEE4] overflow-hidden h-48">
+          <img src="${b.cover_url}" alt="${b.title} cover"
+               onerror="this.onerror=null;this.src='';this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden');"
+               class="w-full h-full object-cover" />
+          <div class="hidden w-full h-full flex items-center justify-center font-display italic text-4xl text-ink-soft">
+            ${b.title.charAt(0)}
+          </div>
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <span class="pos-tag inline-block w-fit mb-2">${b.category}</span>
+          <h3 class="font-display text-lg text-ink leading-snug mb-1">${b.title}</h3>
+          <p class="text-xs text-ink-soft mb-3">${b.author}</p>
+          <span class="mt-auto text-sm text-sage-dark font-medium">Read more →</span>
+        </div>
+      </a>`;
+    }
+
+    document.getElementById("grid").innerHTML =
+      RESUMEN_DATA.map(cardHTML).join("");
+  </script>
+</body>
+</html>

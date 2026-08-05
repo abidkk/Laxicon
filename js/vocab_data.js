@@ -1,4 +1,4 @@
-// ===== Laxicon data layer =====
+// ===== Laxicon vocab data layer =====
 // Fetches the published Google Sheet as CSV and normalizes rows.
 
 function splitList(str) {

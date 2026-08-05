@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- TODO: set page title -->
+<title>How to Talk to Anyone — Laxicon</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+  <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <!-- <a href="index.html"><img src="assets/logo-wordmark.svg" alt="Laxicon" class="h-7"></a> -->
+        <a href="/index.html" class="font-display text-2xl text-ink">Laxicon</a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="/index.html" class="nav-link">Home</a>
+          <a href="/pages/resumen.html" class="nav-link">Resumen</a>
+        <!-- <a href="vocab.html" class="nav-link">Vocab</a>
+        <a href="marginalia.html" class="nav-link">Marginalia</a>
+        <a href="resumen.html" class="nav-link active">Resumen</a>
+        <a href="test.html" class="nav-link">Test</a> -->
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-2xl w-full mx-auto px-6 py-12">
+    <a href="resumen.html" class="text-sm text-sage-dark underline">← Back to Resumen</a>
+
+    <div class="flex gap-6 items-start mt-6 mb-8">
+      <!-- TODO: cover image -->
+      <img src="./images/img1.png" alt="How to Talk to Anyone cover"
+           onerror="this.classList.add('hidden')"
+           class="w-28 rounded-lg shadow-sm shrink-0" />
+      <div>
+        <!-- TODO: category -->
+        <span class="pos-tag inline-block mb-2">Communication</span>
+        <!-- TODO: title -->
+        <h1 class="font-display text-3xl text-ink leading-tight">How to Talk to Anyone</h1>
+        <!-- TODO: author -->
+        <p class="text-ink-soft text-sm mt-1">Leil Lowndes</p>
+      </div>
+    </div>
+
+    <hr class="squiggle-divider mb-8" />
+
+    <section class="mb-8">
+      <h2 class="font-display text-xl text-ink mb-3">Summary</h2>
+      <!-- TODO: replace with your own summary -->
+      <p class="text-ink-soft leading-relaxed">
+        Write your overall summary of the book here — what it's about, why it mattered to you,
+        and the core thesis in a few sentences.
+      </p>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="font-display text-xl text-ink mb-4">The Tricks</h2>
+      <div id="tricks-list" class="space-y-3"></div>
+    </section>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper.
+  </footer>
+
+  <script src="/js/db/httta.js"></script>
+  <script>
+    function bullets(items) {
+      return `<ul class="list-disc list-inside space-y-1.5 text-ink-soft text-sm">${items.map(i => `<li>${i}</li>`).join("")}</ul>`;
+    }
+
+    function trickHTML(t, i) {
+      return `
+      <div class="word-card p-5" id="trick-${i}">
+        <button class="w-full flex items-start justify-between gap-4 text-left" onclick="toggleTrick(${i})">
+          <div>
+            <span class="font-display text-lg text-ink block mb-1 font-bold ">${t.trick}</span>
+            <span class="text-sm text-ink-soft">${t.concept}</span>
+          </div>
+          <svg class="chevron w-4 h-4 text-ink-soft shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <div class="entry-body">
+          <hr class="squiggle-divider my-4" />
+
+          <div class="mb-4">
+            <p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide font-bold bg-[#F6F5F0] p-1">How it works</p>
+            ${bullets(t.howItWorks)}
+          </div>
+
+          <div class="mb-4">
+            <p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide font-bold bg-[#fffaec] p-1">How to apply</p>
+            ${bullets(t.howToApply)}
+          </div>
+
+          <div class="mb-4">
+            <p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide font-bold bg-[#F6F5F0] p-1">Common mistakes</p>
+            ${bullets(t.commonMistakes)}
+          </div>
+
+          <div>
+            <p class="text-xs text-ink-soft mb-1.5 uppercase tracking-wide font-bold bg-[#F6F5F0] p-1">Practice tip</p>
+            <p class="text-sm text-ink italic ">${t.practiceTip}</p>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function toggleTrick(i) {
+      document.getElementById(`trick-${i}`).classList.toggle("open");
+    }
+
+    document.getElementById("tricks-list").innerHTML =
+      HTTA_TRICKS.map(trickHTML).join("");
+  </script>
+</body>
+</html>
