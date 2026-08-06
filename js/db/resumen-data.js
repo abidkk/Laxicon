@@ -8,7 +8,7 @@ const RESUMEN_DATA = [
     title: "How to Talk to Anyone",
     author: "Leil Lowndes",
     category: "Communication",
-    cover_url: "/assets/covers/httta.jpg",
+    cover_url: "../assets/covers/httta.jpg",
     more_info: "howtotalk.html",
   },
   {
