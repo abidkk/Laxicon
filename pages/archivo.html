@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archivo — Laxicon</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+
+    <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <!-- <a href="/index.html"><img src="assets/logo-wordmark.svg" alt="Laxicon" class="h-7"></a> -->
+      <a href="../index.html" class="font-display text-2xl text-ink">Laxicon</a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="../index.html" class="nav-link">Home</a>
+        <a href="../pages/vocab.html" class="nav-link">Vocab</a>
+        <a href="../pages/marginalia.html" class="nav-link">Marginalia</a>
+        <a href="../pages/resumen.html" >Resumen</a>
+   <a href="../pages/archivo.html"  class="nav-link active">Archivo</a>
+        <a href="../pages/test.html" class="nav-link">Test</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-12">
+    <div class="flex items-start justify-between gap-4 mb-1">
+  <h1 class="font-display text-3xl text-ink">Archivo</h1>
+  <a href="https://forms.gle/5vXAxwa3sngHrB4s5" target="_blank" rel="noopener"
+     class="bg-sage-dark text-white px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition shrink-0">
+    + Add New
+  </a>
+</div>
+<p class="text-ink-soft text-sm mb-8">Files worth keeping close, one link away.</p>
+
+    <div class="mb-4">
+      <input id="search" type="text" placeholder="Search title or description…"
+        class="w-full bg-card border border-app rounded-full px-5 py-3 text-sm text-ink placeholder-ink-soft focus:outline-none focus:ring-2 focus:ring-sage" />
+    </div>
+
+    <div class="flex flex-wrap gap-3 mb-2">
+      <select id="filter-category" class="bg-card border border-app rounded-full px-4 py-2 text-sm text-ink-soft focus:outline-none focus:ring-2 focus:ring-sage">
+        <option value="">All categories</option>
+      </select>
+      <button id="clear-filters" class="text-sm text-sage-dark underline">Clear filters</button>
+    </div>
+
+    <p class="text-ink-soft text-sm mt-4 mb-4" id="count-label">Loading…</p>
+    <div id="state-msg" class="text-ink-soft text-sm"></div>
+    <div id="list" class="grid sm:grid-cols-2 gap-4"></div>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper.
+  </footer>
+
+  <script src="../js/archivo-config.js"></script>
+  <script src="../js/archivo-data.js"></script>
+  <script>
+    let allDocs = [];
+
+    const fileIcon = `
+      <svg class="w-6 h-6 text-dusk shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>`;
+
+    function docCardHTML(d) {
+      return `
+      <div class="word-card p-5 flex flex-col">
+        <div class="flex items-start gap-3 mb-3">
+          ${fileIcon}
+          <div>
+            <span class="pos-tag inline-block mb-1.5">${d.category}</span>
+            <h3 class="font-display text-lg text-ink leading-snug">${d.title}</h3>
+          </div>
+        </div>
+        ${d.description ? `<p class="text-sm text-ink-soft mb-4">${d.description}</p>` : ""}
+        <a href="${d.link}" target="_blank" rel="noopener"
+           class="mt-auto inline-flex items-center gap-1.5 w-fit bg-sage-dark text-white px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition">
+          Open / Download ↗
+        </a>
+      </div>`;
+    }
+
+    function render(docs) {
+      document.getElementById("list").innerHTML = docs.map(docCardHTML).join("");
+      document.getElementById("count-label").textContent =
+        `${docs.length} doc${docs.length === 1 ? "" : "s"}`;
+    }
+
+    function populateFilters(docs) {
+      const cats = [...new Set(docs.map(d => d.category).filter(Boolean))].sort();
+      document.getElementById("filter-category").innerHTML =
+        `<option value="">All categories</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join("");
+    }
+
+    function applyFilters() {
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      const category = document.getElementById("filter-category").value;
+      const filtered = allDocs.filter(d => {
+        const matchesQuery = !q || d.title.toLowerCase().includes(q) || d.description.toLowerCase().includes(q);
+        const matchesCategory = !category || d.category === category;
+        return matchesQuery && matchesCategory;
+      });
+      render(filtered);
+    }
+
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("filter-category").addEventListener("change", applyFilters);
+    document.getElementById("clear-filters").addEventListener("click", () => {
+      document.getElementById("search").value = "";
+      document.getElementById("filter-category").value = "";
+      applyFilters();
+    });
+
+    (async () => {
+      const msg = document.getElementById("state-msg");
+      try {
+        allDocs = await fetchDocs();
+        if (!allDocs.length) {
+          msg.textContent = "No docs yet — add a row to your sheet.";
+          document.getElementById("count-label").textContent = "0 docs";
+          return;
+        }
+        populateFilters(allDocs);
+        render(allDocs);
+      } catch (err) {
+        msg.textContent = "Couldn't load your sheet. Check js/archivo-config.js (Sheet ID) and sharing settings.";
+        document.getElementById("count-label").textContent = "";
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>
