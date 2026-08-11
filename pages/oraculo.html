@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oráculo — Laxicon</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+  <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="../index.html" class="font-display text-2xl text-ink">Laxicon</a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="../index.html" class="nav-link">Home</a>
+        <a href="./resumen.html" class="nav-link">Resumen</a>
+        <a href="./archivo.html" class="nav-link">Archivo</a>
+        <a href="./oraculo.html" class="nav-link active">Oráculo</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-2xl w-full mx-auto px-6 py-12 flex flex-col">
+    <h1 class="font-display text-3xl text-ink mb-1">Oráculo</h1>
+    <p class="text-ink-soft text-sm mb-6">Ask anything — it answers from your Vocab, Marginalia, tricks, and Archivo.</p>
+
+    <p id="index-status" class="text-xs text-ink-soft mb-4">Preparing…</p>
+
+    <div id="chat" class="space-y-4 mb-6 flex-1"></div>
+
+    <form id="ask-form" class="flex gap-2 sticky bottom-4">
+      <input id="question" type="text" placeholder="Ask a question…" disabled
+        class="flex-1 bg-card border border-app rounded-full px-5 py-3 text-sm text-ink placeholder-ink-soft focus:outline-none focus:ring-2 focus:ring-sage disabled:opacity-50" />
+      <button id="ask-btn" type="submit" disabled
+        class="bg-sage-dark text-white px-5 py-3 rounded-full text-sm font-medium hover:opacity-90 transition disabled:opacity-50">
+        Ask
+      </button>
+    </form>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper.
+  </footer>
+
+  <!-- Sheet configs + fetchers (reused from your existing pages) -->
+   <script src="../js/archivo-config.js"></script>
+   <script src="../js/archivo-data.js"></script>
+   <script src="../js/httta-config.js"></script>
+   <script src="../js/httta-data.js"></script>
+   <script src="../js/marginalia-config.js"></script>
+   <script src="../js/marginalia-data.js"></script>
+   <!-- <script src="../js/menu.js"></script> -->
+   <script src="../js/vocab_config.js"></script>
+   <script src="../js/vocab_data.js"></script>
+   <!-- <script src="../js/db/httta.js"></script> -->
+   <script src="../js/db/resumen-data.js"></script>
+
+
+
+  <!-- Oráculo -->
+  <script src="../js/model/oraculo-corpus.js"></script>
+  <script src="../js/model/oraculo-config.js"></script>
+  <script type="module" src="../js/model/oraculo-embed.js"></script>
+
+
+  <script type="module">
+    import { buildOrLoadIndex, retrieveTopK } from "../js/model/oraculo-embed.js";
+
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("ask-form");
+    const input = document.getElementById("question");
+    const btn = document.getElementById("ask-btn");
+    const statusEl = document.getElementById("index-status");
+
+    let index = null;
+
+    function addBubble(role, text, sources) {
+      const isUser = role === "user";
+      const bubble = document.createElement("div");
+      bubble.className = isUser ? "flex justify-end" : "flex justify-start";
+      bubble.innerHTML = `
+        <div class="max-w-[85%] ${isUser ? "bg-sage-dark text-white" : "word-card"} px-4 py-3 rounded-2xl">
+          <p class="text-sm ${isUser ? "" : "text-ink"}">${text}</p>
+          ${sources ? `<div class="flex flex-wrap gap-1.5 mt-2">${sources.map(s => `<span class="chip">${s}</span>`).join("")}</div>` : ""}
+        </div>`;
+      chat.appendChild(bubble);
+      bubble.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+
+    (async () => {
+      try {
+        index = await buildOrLoadIndex((done, total) => {
+          statusEl.textContent = `Indexing your notes… (${done}/${total})`;
+        });
+        statusEl.textContent = `Ready — ${index.chunks.length} entries indexed.`;
+        input.disabled = false;
+        btn.disabled = false;
+      } catch (err) {
+        statusEl.textContent = "Couldn't build the index. Check console for details.";
+        console.error(err);
+      }
+    })();
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = input.value.trim();
+      if (!question || !index) return;
+
+      addBubble("user", question);
+      input.value = "";
+      btn.disabled = true;
+
+      const thinking = document.createElement("div");
+      thinking.className = "flex justify-start";
+      thinking.innerHTML = `<div class="word-card px-4 py-3 rounded-2xl text-sm text-ink-soft">Thinking…</div>`;
+      chat.appendChild(thinking);
+
+      try {
+        const results = await retrieveTopK(question, index, 10);
+        const context = results.map(r => r.chunk.text).join("\n\n---\n\n");
+        const sources = [...new Set(results.map(r => r.chunk.source))];
+
+        const res = await fetch(ORACULO_CONFIG.WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, context }),
+        });
+        const data = await res.json();
+
+        thinking.remove();
+        addBubble("assistant", data.answer || "No response.", sources);
+      } catch (err) {
+        thinking.remove();
+        addBubble("assistant", "Something went wrong reaching Oráculo. Check js/oraculo-config.js (Worker URL).");
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
