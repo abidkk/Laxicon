@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gramática — Laxicon</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-app min-h-screen flex flex-col">
+
+  <header class="border-b border-app">
+    <nav class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="../index.html" class="font-display text-2xl text-ink">Laxicon</a>
+      <div class="flex gap-6 text-sm font-medium text-ink-soft">
+        <a href="../index.html" class="nav-link">Home</a>
+        <a href="vocab.html" class="nav-link">Vocab</a>
+        <a href="marginalia.html" class="nav-link">Marginalia</a>
+        <a href="archivo.html" class="nav-link">Archivo</a>
+        <a href="gramatica.html" class="nav-link active">Gramática</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-2xl w-full mx-auto px-6 py-12">
+    <h1 class="font-display text-3xl text-ink mb-1">Gramática</h1>
+    <p class="text-ink-soft text-sm mb-8">English grammar, organized lesson by lesson.</p>
+
+    <div id="lessons-list" class="space-y-3"></div>
+  </main>
+
+  <footer class="border-t border-app py-6 text-center text-xs text-ink-soft">
+    Laxicon — a personal vocabulary keeper.
+  </footer>
+
+  <script src="../js/gramatics-data.js"></script>
+  <script>
+    const fileIcon = `
+      <svg class="w-4 h-4 text-dusk shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>`;
+
+    function topicRow(t) {
+      return `
+      <a href="${t.link}" target="_blank" rel="noopener"
+         class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-[#F6F5F0] transition text-sm text-ink">
+        ${fileIcon}
+        <span class="flex-1">${t.title}</span>
+        <span class="text-ink-soft text-xs">Open ↗</span>
+      </a>`;
+    }
+
+    function lessonHTML(l, i) {
+      return `
+      <div class="word-card p-5" id="lesson-${i}">
+        <button class="w-full flex items-center justify-between gap-4 text-left" onclick="toggleLesson(${i})">
+          <span class="font-display text-lg text-ink">${l.lesson}</span>
+          <svg class="chevron w-4 h-4 text-ink-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <div class="entry-body">
+          <hr class="squiggle-divider my-4" />
+          <div class="flex flex-col gap-1">
+            ${l.topics.map(topicRow).join("")}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function toggleLesson(i) {
+      document.getElementById(`lesson-${i}`).classList.toggle("open");
+    }
+
+    document.getElementById("lessons-list").innerHTML =
+      GRAMATICA_DATA.map(lessonHTML).join("");
+  </script>
+</body>
+</html>
