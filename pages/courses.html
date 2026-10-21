@@ -1,0 +1,796 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <title>Course: Artificial Intelligence</title>
+
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --text: #1b1f2a;
+      --muted: #5d6475;
+      --line: #dfe2e8;
+      --accent: #2447d6;
+      --accent-text: #ffffff;
+      --active-bg: #e8edff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12141a;
+        --surface: #1b1e27;
+        --text: #eceef4;
+        --muted: #9aa1b3;
+        --line: #2c303c;
+        --accent: #7b96ff;
+        --accent-text: #101428;
+        --active-bg: #263055;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI",
+        Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 14px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 650;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        align-items: start;
+      }
+    }
+
+    .player-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .player-wrap iframe,
+    .player-wrap #player {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .counter {
+      flex: 1;
+      text-align: center;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 600;
+      padding: 10px 16px;
+      min-height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: var(--accent-text);
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+    }
+
+    button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    button:focus-visible,
+    .item:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .options {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .options label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .notice {
+      margin-top: 10px;
+      color: #b3261e;
+      font-size: .9rem;
+      overflow-wrap: anywhere;
+    }
+
+    .notice a {
+      color: var(--accent);
+    }
+
+    .list-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .list-panel h2 {
+      margin: 0;
+      padding: 12px 14px;
+      font-size: .95rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .list {
+      max-height: 60vh;
+      overflow-y: auto;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    @media (min-width: 900px) {
+      .list {
+        max-height: calc(100vh - 160px);
+      }
+    }
+
+    .item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+    }
+
+    .item:last-child {
+      border-bottom: 0;
+    }
+
+    .item:hover,
+    .item.active {
+      background: var(--active-bg);
+    }
+
+    .item.active {
+      font-weight: 650;
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .item .n {
+      min-width: 2.8em;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .item img {
+      width: 64px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--line);
+      flex-shrink: 0;
+    }
+
+    .item .video-title {
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+
+<body>
+  <head> <a href="./index.html" class="nav-link active">Home</a></head>
+
+<header>
+  <h1 id="courseTitle">Course: Artificial Intelligence</h1>
+</header>
+
+<main class="layout">
+
+  <section>
+    <div class="player-wrap">
+      <div id="player"></div>
+    </div>
+
+    <div class="controls">
+      <button id="prevBtn" class="secondary" type="button">
+        Previous
+      </button>
+
+      <div class="counter" id="counter">
+        Video 1 of 1
+      </div>
+
+      <button id="nextBtn" type="button">
+        Next
+      </button>
+    </div>
+
+    <div class="options">
+      <label>
+        <input type="checkbox" id="autoNext" checked>
+        Play next video automatically
+      </label>
+    </div>
+
+    <div class="notice" id="notice" role="status"
+         aria-live="polite"></div>
+  </section>
+
+  <aside class="list-panel">
+    <h2>All videos</h2>
+    <ul class="list" id="list"></ul>
+  </aside>
+
+</main>
+
+<script>
+  // ==========================================
+  // COURSE SETTINGS
+  // ==========================================
+
+  const COURSE_TITLE = "Course: Artificial Intelligence";
+
+  // Add one YouTube link per line.
+  const VIDEO_LINKS = `
+https://www.youtube.com/watch?v=CmVkzhiHSWw
+https://www.youtube.com/watch?v=8FocZfKN67g
+https://www.youtube.com/watch?v=xBORP6maPYI
+https://www.youtube.com/watch?v=BOhLunvfH6U
+https://www.youtube.com/watch?v=keAh8_wFibQ
+https://www.youtube.com/watch?v=Ddig_59tTQA
+https://www.youtube.com/watch?v=JUtNj8_uovU
+https://www.youtube.com/watch?v=UpH7mCnYtIk
+https://www.youtube.com/watch?v=o0JQwih9Vc8
+https://www.youtube.com/watch?v=JE0Ltv1TIjA
+https://www.youtube.com/watch?v=iBZ6sN6D59I
+https://www.youtube.com/watch?v=mro8YsFhSqc
+https://www.youtube.com/watch?v=sfxA5kU0GDw
+https://www.youtube.com/watch?v=fe_oWzGYxks
+https://www.youtube.com/watch?v=5vZd9bZ_z50
+https://www.youtube.com/watch?v=3rwrGV0a1hs
+https://www.youtube.com/watch?v=lo-5M_FCTbk
+https://www.youtube.com/watch?v=9hiwOH3oDIo
+https://www.youtube.com/watch?v=YzTjliN2NhM
+https://www.youtube.com/watch?v=aqx5at6ES8U
+https://www.youtube.com/watch?v=C22Q3oiPwS8
+https://www.youtube.com/watch?v=56b4HcggiBg
+https://www.youtube.com/watch?v=hBaJhXD1vbM
+https://www.youtube.com/watch?v=PiN_PCNJl3A
+https://www.youtube.com/watch?v=DX7Vmk6QUQQ
+https://www.youtube.com/watch?v=R3d2_MrbwmU
+https://www.youtube.com/watch?v=Rt4WGeUqD_M
+https://www.youtube.com/watch?v=Qjn6AxiBjWs
+https://www.youtube.com/watch?v=EqTjgjp5cNk
+https://www.youtube.com/watch?v=5WBKVF8erTg
+https://www.youtube.com/watch?v=L94N7PrdDvs
+https://www.youtube.com/watch?v=F0-2XCOZEmQ
+https://www.youtube.com/watch?v=I6M19iciBA8
+https://www.youtube.com/watch?v=IKgMg22HpMo
+https://www.youtube.com/watch?v=8zxs8WaP788
+https://www.youtube.com/watch?v=r4MhdtDZAUU
+https://www.youtube.com/watch?v=P1by_MbU3c8
+https://www.youtube.com/watch?v=q3Q03mMoOho
+https://www.youtube.com/watch?v=vz3Gozk2Qr0
+https://www.youtube.com/watch?v=QvsVCNQzjb0
+https://www.youtube.com/watch?v=ogAdh9ZhiZc
+https://www.youtube.com/watch?v=bFKDvVPkkEw
+https://www.youtube.com/watch?v=O41FTH3h7z0
+https://www.youtube.com/watch?v=9nYOH-LBsZs
+https://www.youtube.com/watch?v=_5tdocpBcCs
+https://www.youtube.com/watch?v=6IEpdjRcV88
+https://www.youtube.com/watch?v=cCeOBqLJsD0
+https://www.youtube.com/watch?v=wtAfHvX_3z0
+https://www.youtube.com/watch?v=0nYmVf4Wlfk
+https://www.youtube.com/watch?v=lhKaqkq1iAs
+https://www.youtube.com/watch?v=zC7-17UaE1U
+https://www.youtube.com/watch?v=W2dUWQ8LGjA
+https://www.youtube.com/watch?v=HbxkRxTsFFY
+https://www.youtube.com/watch?v=yqbX7DrkLr4
+https://www.youtube.com/watch?v=rtx4-ZM9Ts4
+https://www.youtube.com/watch?v=nnjJe1qO7y8
+https://www.youtube.com/watch?v=bkF5Fs4eSGU
+https://www.youtube.com/watch?v=4GxFNpwFEQ8
+https://www.youtube.com/watch?v=L7VERmo9uCo
+https://www.youtube.com/watch?v=4VeEMr-mH_k
+https://www.youtube.com/watch?v=c1awkor2eiI
+https://www.youtube.com/watch?v=AzHoYZVB9fM
+https://www.youtube.com/watch?v=XjKAWNVgUS0
+https://www.youtube.com/watch?v=OVy-Wy7iwLg
+https://www.youtube.com/watch?v=IUL9Kz7nxXg
+https://www.youtube.com/watch?v=9TAVDLQuegM
+https://www.youtube.com/watch?v=yJTR_g5QqSM
+https://www.youtube.com/watch?v=dXZVGzFv_Sw
+https://www.youtube.com/watch?v=rADu_-K51u4
+https://www.youtube.com/watch?v=P3GQh_pLMqs
+https://www.youtube.com/watch?v=qKnoKvsn5xs
+https://www.youtube.com/watch?v=FiqI8Wdt1TQ
+https://www.youtube.com/watch?v=VsD35MY5BsI
+https://www.youtube.com/watch?v=c1FVE-tGYHE
+https://www.youtube.com/watch?v=qq0LOihWK9g
+https://www.youtube.com/watch?v=vkgItXBkhOk
+https://www.youtube.com/watch?v=w0mcfioYKmU
+https://www.youtube.com/watch?v=uzqHXzIrbxc
+https://www.youtube.com/watch?v=TXZbWDbSICw
+https://www.youtube.com/watch?v=LVRdg2PNqxE
+https://www.youtube.com/watch?v=MZbcbCDWhf4
+https://www.youtube.com/watch?v=2LaoXMi3plw
+https://www.youtube.com/watch?v=UkA4twmDPMU
+https://www.youtube.com/watch?v=pIdL27377cc
+https://www.youtube.com/watch?v=h0O1ERydRno
+https://www.youtube.com/watch?v=WO71kK6vpRk
+https://www.youtube.com/watch?v=IfSUgwk8H3o
+https://www.youtube.com/watch?v=eaeJu7_HTXQ
+https://www.youtube.com/watch?v=4WhpyrUJy4g
+https://www.youtube.com/watch?v=-GCd3-_b6R4
+https://www.youtube.com/watch?v=BCaSSzjUGIU
+https://www.youtube.com/watch?v=ZFOd2aEYtaY
+https://www.youtube.com/watch?v=hrevMWeFtJA
+https://www.youtube.com/watch?v=UUKoR-uBCtI
+https://www.youtube.com/watch?v=yE9PeFAdBCA
+https://www.youtube.com/watch?v=RtWR2fjJyX8
+https://www.youtube.com/watch?v=iuq8tCGx-bE
+https://www.youtube.com/watch?v=8enAVCKbAbA
+https://www.youtube.com/watch?v=5l4h-B4TMK0
+https://www.youtube.com/watch?v=dJ1JiP4dZpc
+https://www.youtube.com/watch?v=1-f73eU0EUU
+https://www.youtube.com/watch?v=slHziuwQMHg
+https://www.youtube.com/watch?v=0WwIbMflUus
+https://www.youtube.com/watch?v=qtP2cC0q3Gw
+https://www.youtube.com/watch?v=ZtUx2Vpptpg
+https://www.youtube.com/watch?v=da_4NscC120
+https://www.youtube.com/watch?v=4zgE_uNmoAc
+https://www.youtube.com/watch?v=DGQrpN1vLoc
+https://www.youtube.com/watch?v=jWPBvZvR8Kw
+https://www.youtube.com/watch?v=kNQpChk6o54
+https://www.youtube.com/watch?v=bo5rk930V-8
+https://www.youtube.com/watch?v=cMIB6MjNxEU
+https://www.youtube.com/watch?v=pvwYSDwiS5g
+https://www.youtube.com/watch?v=vM78cXgmMXQ
+https://www.youtube.com/watch?v=Gz-5xhvdKU8
+https://www.youtube.com/watch?v=RKiEPzhJqEA
+https://www.youtube.com/watch?v=pOgvWxYDRnU
+https://www.youtube.com/watch?v=Hz3kq32pIR0
+https://www.youtube.com/watch?v=jtmZZ5M9w08
+https://www.youtube.com/watch?v=QC6gNFXkcqU
+https://www.youtube.com/watch?v=OdrXiqnIKjM
+https://www.youtube.com/watch?v=oqZitSHDUc8
+https://www.youtube.com/watch?v=bjHp-8_qYYs
+https://www.youtube.com/watch?v=7H2Ob_bYBM0
+https://www.youtube.com/watch?v=0WukzEvl6G4
+https://www.youtube.com/watch?v=ZJ9GoQcXfPA
+https://www.youtube.com/watch?v=wbb6AOzwGDM
+https://www.youtube.com/watch?v=oohUFjNYRIQ
+https://www.youtube.com/watch?v=AktpLl4_mOQ
+https://www.youtube.com/watch?v=4OSa8Jq3yNw
+https://www.youtube.com/watch?v=0dElzfJv-rw
+https://www.youtube.com/watch?v=MNx_L596h3U
+https://www.youtube.com/watch?v=LZ3erDFKiZs
+https://www.youtube.com/watch?v=ews-v8H5XY4
+https://www.youtube.com/watch?v=_di_fZIzHz4
+https://www.youtube.com/watch?v=wugBiikK_ts
+https://www.youtube.com/watch?v=Q2m-g9IVNi0
+https://www.youtube.com/watch?v=To2AeeNbk7Y
+https://www.youtube.com/watch?v=uocedVP8Bx4
+https://www.youtube.com/watch?v=-PsYyWX8rdM
+https://www.youtube.com/watch?v=tehJoKnn8og
+https://www.youtube.com/watch?v=fuFuyJaWVY8
+https://www.youtube.com/watch?v=gkIJAvnQZmg
+https://www.youtube.com/watch?v=nnoEk4oZxUg
+https://www.youtube.com/watch?v=kVgnIafjX08
+https://www.youtube.com/watch?v=7l7P5O5ZRZM
+https://www.youtube.com/watch?v=xZ2YHRfX_s4
+https://www.youtube.com/watch?v=FcHjaFJi0mg
+https://www.youtube.com/watch?v=xYrFNxGDOgk
+https://www.youtube.com/watch?v=a7N98RGy7aM
+https://www.youtube.com/watch?v=hB7nibsgGS8
+https://www.youtube.com/watch?v=zItYDZvOp6E
+https://www.youtube.com/watch?v=NDps_bFBtvo
+https://www.youtube.com/watch?v=rkoXp1AQVn4
+https://www.youtube.com/watch?v=FistTVsz9n8
+https://www.youtube.com/watch?v=fSFs1V0IEpM
+https://www.youtube.com/watch?v=X-_dlxpm4mY
+https://www.youtube.com/watch?v=Fo4sHb0gRxY
+https://www.youtube.com/watch?v=c2N1l7Faih4
+https://www.youtube.com/watch?v=LDfwoes58ZA
+https://www.youtube.com/watch?v=Z0m52b2jB4A
+https://www.youtube.com/watch?v=aBIeGmRFVGw
+https://www.youtube.com/watch?v=Aie9bkr2R_8
+https://www.youtube.com/watch?v=enflZXXsHWg
+https://www.youtube.com/watch?v=e-ig47n6Pr8
+https://www.youtube.com/watch?v=cYm4ChGrdG0
+https://www.youtube.com/watch?v=_ecbq9KfrlE
+https://www.youtube.com/watch?v=cedNT61RLZQ
+https://www.youtube.com/watch?v=qvq5936ky9Q
+https://www.youtube.com/watch?v=9iC1VH6-F5I
+https://www.youtube.com/watch?v=EydZJE74gFU
+https://www.youtube.com/watch?v=gwrDv7PZpF8
+https://www.youtube.com/watch?v=MPmFl8-u6aA
+https://www.youtube.com/watch?v=8TOy2vJWHYs
+https://www.youtube.com/watch?v=jM4q1RQAhaY
+https://www.youtube.com/watch?v=gg_O3yFw6Mc
+https://www.youtube.com/watch?v=gvCZI2ppAo4
+https://www.youtube.com/watch?v=uzrGBZh2isQ
+https://www.youtube.com/watch?v=Nyb2oiIN_c8
+https://www.youtube.com/watch?v=B5D1yUJoguM
+https://www.youtube.com/watch?v=YR9CFeSucmc
+https://www.youtube.com/watch?v=dgYCCqzxMbs
+https://www.youtube.com/watch?v=sY8V67sqgaY
+https://www.youtube.com/watch?v=sZS_7WBisWI
+https://www.youtube.com/watch?v=R8Z5jtzpuA4
+https://www.youtube.com/watch?v=Q0Im4GL3gok
+https://www.youtube.com/watch?v=trXS9m8LiOM
+https://www.youtube.com/watch?v=RWxKxJuAXKY
+https://www.youtube.com/watch?v=2NjhtWx1s3s
+https://www.youtube.com/watch?v=WPlo7Op0GYg
+https://www.youtube.com/watch?v=tsvqgidOD6Y
+https://www.youtube.com/watch?v=9M1wbHkLmMc
+https://youtu.be/PcSFCcjjCI8?si=xuNkHazq8zy54m14
+
+`;
+
+  // ==========================================
+  // INITIAL SETUP
+  // ==========================================
+
+  document.title = COURSE_TITLE;
+  document.getElementById("courseTitle").textContent =
+    COURSE_TITLE;
+
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const counter = document.getElementById("counter");
+  const listEl = document.getElementById("list");
+  const notice = document.getElementById("notice");
+  const autoNext = document.getElementById("autoNext");
+
+  function extractId(url) {
+    try {
+      const parsed = new URL(url);
+
+      let id = null;
+
+      if (parsed.hostname === "youtu.be") {
+        id = parsed.pathname.split("/")[1];
+      } else if (
+        parsed.hostname === "youtube.com" ||
+        parsed.hostname.endsWith(".youtube.com")
+      ) {
+        if (parsed.pathname === "/watch") {
+          id = parsed.searchParams.get("v");
+        } else {
+          const match = parsed.pathname.match(
+            /^\/(?:embed|shorts|live)\/([A-Za-z0-9_-]{11})/
+          );
+
+          if (match) id = match[1];
+        }
+      }
+
+      return id && /^[A-Za-z0-9_-]{11}$/.test(id)
+        ? id
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const videos = VIDEO_LINKS
+    .split(/\r?\n/)
+    .map(url => url.trim())
+    .filter(Boolean)
+    .map(extractId)
+    .filter(Boolean);
+
+  // Keep progress separate for each course.
+  const STORAGE_KEY = "course-progress:" + COURSE_TITLE;
+
+  let current = 0;
+  let player = null;
+  let playerReady = false;
+  let pendingIndex = null;
+
+  try {
+    const saved = Number(
+      localStorage.getItem(STORAGE_KEY)
+    );
+
+    if (
+      localStorage.getItem(STORAGE_KEY) !== null &&
+      Number.isInteger(saved) &&
+      saved >= 0 &&
+      saved < videos.length
+    ) {
+      current = saved;
+    }
+  } catch (error) {
+    // The player can still work if storage is unavailable.
+  }
+
+  // ==========================================
+  // BUILD VIDEO LIST
+  // ==========================================
+
+  videos.forEach((id, index) => {
+    const li = document.createElement("li");
+    li.className = "item";
+    li.tabIndex = 0;
+    li.dataset.index = index;
+
+    const number = document.createElement("span");
+    number.className = "n";
+    number.textContent =
+      "Lec-" + String(index + 1).padStart(2, "0");
+
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.alt = "";
+    img.src =
+      "https://i.ytimg.com/vi/" + id + "/mqdefault.jpg";
+
+    const title = document.createElement("span");
+    title.className = "video-title";
+    title.textContent = "Lecture " +
+      String(index + 1).padStart(2, "0");
+
+    li.append(number, img, title);
+
+    li.addEventListener("click", () => go(index));
+
+    li.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        go(index);
+      }
+    });
+
+    listEl.appendChild(li);
+  });
+
+  // ==========================================
+  // UPDATE USER INTERFACE
+  // ==========================================
+
+  function updateUI() {
+    counter.textContent = videos.length
+      ? "Video " + (current + 1) + " of " + videos.length
+      : "No videos available";
+
+    prevBtn.disabled = current <= 0;
+    nextBtn.disabled =
+      current >= videos.length - 1 || videos.length === 0;
+
+    listEl.querySelectorAll(".item").forEach(item => {
+      const active = Number(item.dataset.index) === current;
+
+      item.classList.toggle("active", active);
+
+      if (active) {
+        item.setAttribute("aria-current", "true");
+      } else {
+        item.removeAttribute("aria-current");
+      }
+    });
+
+    const activeEl = listEl.querySelector(".item.active");
+
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: "nearest" });
+    }
+
+    try {
+      localStorage.setItem(STORAGE_KEY, String(current));
+    } catch (error) {
+      // Progress saving is optional.
+    }
+  }
+
+  // ==========================================
+  // CHANGE VIDEO
+  // ==========================================
+
+  function go(index, autoplay = true) {
+    if (index < 0 || index >= videos.length) return;
+
+    current = index;
+    notice.replaceChildren();
+    updateUI();
+
+    if (!playerReady || !player) {
+      pendingIndex = index;
+      return;
+    }
+
+    if (autoplay) {
+      player.loadVideoById(videos[current]);
+    } else {
+      player.cueVideoById(videos[current]);
+    }
+  }
+
+  prevBtn.addEventListener("click", () => {
+    go(current - 1);
+  });
+
+  nextBtn.addEventListener("click", () => {
+    go(current + 1);
+  });
+
+  document.addEventListener("keydown", event => {
+    if (
+      event.target.closest("input, button, .item, a, textarea")
+    ) {
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      go(current + 1);
+    }
+
+    if (event.key === "ArrowLeft") {
+      go(current - 1);
+    }
+  });
+
+  // ==========================================
+  // YOUTUBE IFRAME API
+  // ==========================================
+
+  function onYouTubeIframeAPIReady() {
+    if (!videos.length) return;
+
+    player = new YT.Player("player", {
+      host: "https://www.youtube.com",
+      videoId: videos[current],
+
+      playerVars: {
+        enablejsapi: 1,
+        origin: window.location.origin,
+        rel: 0,
+        playsinline: 1
+      },
+
+      events: {
+        onReady: function () {
+          playerReady = true;
+
+          if (pendingIndex !== null) {
+            const index = pendingIndex;
+            pendingIndex = null;
+
+            go(index, false);
+          }
+        },
+
+        onStateChange: function (event) {
+          if (
+            event.data === YT.PlayerState.ENDED &&
+            autoNext.checked
+          ) {
+            if (current < videos.length - 1) {
+              go(current + 1);
+            }
+          }
+        },
+
+        onError: function (event) {
+          const videoId = videos[current];
+          const url =
+            "https://www.youtube.com/watch?v=" + videoId;
+
+          const messages = {
+            2: "Invalid video ID or player parameter.",
+            5: "The HTML5 player could not play this video.",
+            100: "This video is unavailable or has been removed.",
+            101: "The owner does not allow embedded playback.",
+            150: "The owner does not allow embedded playback.",
+            153: "YouTube could not verify the request's client or referrer information."
+          };
+
+          notice.replaceChildren();
+
+          const message = document.createElement("span");
+          message.textContent =
+            (messages[event.data] ||
+              "YouTube playback failed.") +
+            " Error code: " + event.data + ". ";
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "Watch on YouTube";
+
+          notice.append(message, link);
+        }
+      }
+    });
+  }
+
+  // ==========================================
+  // LOAD API
+  // ==========================================
+
+  if (videos.length) {
+    updateUI();
+
+    window.onYouTubeIframeAPIReady =
+      onYouTubeIframeAPIReady;
+
+    const script = document.createElement("script");
+    script.src = "https://www.youtube.com/iframe_api";
+    script.async = true;
+
+    script.onerror = function () {
+      notice.textContent =
+        "Could not load YouTube's player API. " +
+        "Check your internet connection or browser extensions.";
+    };
+
+    document.head.appendChild(script);
+  } else {
+    notice.textContent =
+      "No valid YouTube links found. Check VIDEO_LINKS.";
+
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+  }
+</script>
+
+</body>
+</html>
